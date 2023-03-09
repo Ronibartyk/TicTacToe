@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+    body{background-color: lightskyblue;}
+    .p1{background-color: brown;}
+    .p2{background-color: chartreuse;}
+    td{width:30px;height: 30px;border: 1px solid black;}
+    #end{width: 100%; height: 200px;background-color: red;color: white;display: none;}
+    </style>
+</head>
+<body>
+<div id="title"></div>
+<div id="end">Game Finished
+    <button id="restartBTN">restart Game</button>
+</div>
+<table id="brd">
+<tr>
+    <td id="c1" onclick="sendMove(1)"></td>
+    <td id="c2" onclick="sendMove(2)"></td>
+    <td id="c3" onclick="sendMove(3)"></td>
+</tr>
+<tr>
+    <td id="c4" onclick="sendMove(4)"></td>
+    <td id="c5" onclick="sendMove(5)"></td>
+    <td id="c6" onclick="sendMove(6)"></td>
+</tr>
+<tr>
+    <td id="c7" onclick="sendMove(7)"></td>
+    <td id="c8" onclick="sendMove(8)"></td>
+    <td id="c9" onclick="sendMove(9)"></td>
+</tr>
+</table>
+<script>
+var player=<%= player %>;
+console.log(<%= player %>);
+h1 = document.createElement("h1");
+div = document.getElementById("title");
+if(player > 0 && player < 3){
+    h1.innerHTML += "Player " + player;
+}
+else{
+    h1.innerHTML += "Spectator"
+}
+div.appendChild(h1);
+function setP1(num){
+    document.getElementById("c"+num).classList.add("p1");
+}
+function setP2(num){
+    document.getElementById("c"+num).classList.add("p2");
+}
+function setStart1(num){
+    document.getElementById("c"+num).classList.remove("p1");
+    document.getElementById("c"+num).classList.remove("p2");
+}
+function updateData(data){
+    console.log(data);
+    if(data.GameStatus=="on"){
+        if(data.player==1){
+            setP1(data.cell);
+        } else {
+            setP2(data.cell);
+        }
+    }
+    else if(data.GameStatus=="over"){
+        GameOver();
+    }
+    else if(data.GameStatus=="WaitToStart"){
+        for (let i=1; i<=9; i++){
+            setStart(i);
+        }
+    }
+}
+function NewGame(){
+  for(i = 1 ; i <= 9 ; i ++){
+    async function sendMove(i){
+    let response = await fetch(`/GetMove/${player}/${cell}`);
+    let data = await response.json();
+    updateData(data);
+}
+    document.getElementById("c"+i).classList.remove;
+  }
+  lastMove={"GameStatus":"WaitToStart"};
+  document.getElementById("end").style.display="none";
+  document.getElementById("brd").style.display="block";
+}
+function GameOver(){
+    document.getElementById("brd").style.display="none";
+    document.getElementById("end").style.display="block";
+}
+async function sendMove(cell){
+    let response = await fetch(`/GetMove/${player}/${cell}`);
+    let data = await response.json();
+    updateData(data);
+}
+async function fetchText() {
+    let response = await fetch('/GetLast');
+    let data = await response.json();
+    updateData(data);
+}
+setInterval(fetchText,500);
+
+var restartBTN = document.getElementById("restartBTN");
+restartBTN.onclick = function(event) {
+    console.log("restart begin");
+    restartfun();
+    document.getElementById("brd").style.display="block";
+    document.getElementById("end").style.display="none";
+}
+
+async function restartfun() {
+    let response = await fetch('/NewGame');
+    let data = await response.json();
+    updateData(data);
+}
+</script>
+</body>
+</html>
